@@ -76,4 +76,164 @@ A multi-agent system built with LangGraph that researches a topic, gathers groun
 * **Technology convergence**: Magnetic‑confinement (tokamak, stellarator, FRC) and inertial‑confinement are both maturing, with cross‑disciplinary tools (quantum simulation) being adopted.  
 * **Policy & funding**: ITER remains a long‑term public‑private partnership, while private startups are rapidly closing high‑value rounds, indicating a shift from purely public‑sector to mixed‑model development.
 
-These points summarize the most recent, high‑impact developments in fusion energy as of **23 August 2026**.
+# Day 2: Multi-Agent Research Graph
+
+## Overview
+
+Today, I built the core **multi-agent orchestration graph** using LangGraph.
+
+The goal was to move from a single-agent workflow to a system where multiple specialized agents collaborate through a shared state and can iterate through a feedback loop.
+
+---
+
+## Architecture
+
+The system contains four agents:
+
+* **Planner** — Breaks the main topic into sub-questions.
+* **Researcher** — Generates research findings for each question.
+* **Critic** — Reviews the research and decides whether more research is needed.
+* **Writer** — Produces the final report.
+
+```mermaid
+graph TD
+    START([START]) --> Planner
+    Planner --> Researcher
+    Researcher --> Critic
+
+    Critic -. More Research .-> Researcher
+    Critic -. Approved .-> Writer
+
+    Writer --> END([END])
+```
+
+The feedback loop allows the Critic to send the workflow back to the Researcher instead of following a strictly linear pipeline.
+
+---
+
+## Shared State
+
+All agents communicate through a shared `ResearchState`.
+
+```python
+from typing import TypedDict, Annotated
+import operator
+
+
+class ResearchState(TypedDict):
+    topic: str
+    sub_questions: list[str]
+
+    research_notes: Annotated[
+        list[dict],
+        operator.add
+    ]
+
+    critique: str
+    needs_more_research: bool
+    final_report: str
+    revision_count: int
+```
+
+The important part is:
+
+```python
+research_notes: Annotated[list[dict], operator.add]
+```
+
+Using `operator.add` ensures research findings accumulate across multiple iterations instead of being overwritten.
+
+---
+
+## Feedback Loop
+
+The Critic determines where the graph goes next:
+
+```python
+def route_after_critic(state: ResearchState) -> str:
+    if (
+        state["needs_more_research"]
+        and state["revision_count"] < 3
+    ):
+        return "researcher"
+
+    return "writer"
+```
+
+Execution flow:
+
+```text
+Planner
+   ↓
+Researcher
+   ↓
+Critic
+   ↓
+More research needed?
+   ├── Yes → Researcher
+   └── No  → Writer → END
+```
+
+`revision_count` acts as a safety mechanism to prevent infinite loops.
+
+---
+
+## Testing
+
+The graph was tested with:
+
+```text
+How do multi-agent AI systems work?
+```
+
+The execution successfully followed this path:
+
+```text
+Planner
+   ↓
+Researcher → 2 research notes
+   ↓
+Critic → Research incomplete
+   ↓
+Researcher → 4 accumulated notes
+   ↓
+Critic → Approved
+   ↓
+Writer
+   ↓
+END
+```
+
+This confirmed that:
+
+* Shared state is passed correctly between agents.
+* Research results accumulate across iterations.
+* Conditional routing works.
+* The Critic can trigger a feedback loop.
+* The Writer receives the final accumulated state.
+* The graph terminates successfully.
+
+---
+
+## Key Concepts Learned
+
+* **State management** using `TypedDict`
+* **State reducers** using `Annotated` and `operator.add`
+* **Multi-agent orchestration** with LangGraph
+* **Conditional edges** for dynamic routing
+* **Feedback loops** for iterative workflows
+* **Safety limits** using `revision_count`
+* **Graph visualization** using Mermaid
+
+---
+
+## Day 2 Completion
+
+* [x] Created shared state schema
+* [x] Implemented Planner, Researcher, Critic, and Writer nodes
+* [x] Added research state accumulation
+* [x] Built conditional routing
+* [x] Implemented and tested the feedback loop
+* [x] Added revision safety limits
+* [x] Generated Mermaid graph output
+* [x] Successfully tested the complete workflow
