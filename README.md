@@ -230,3 +230,72 @@ This confirmed that:
 * [x] Added revision safety limits
 * [x] Generated Mermaid graph output
 * [x] Successfully tested the complete workflow
+# Day 3: Real Planner & Researcher
+
+## Overview
+
+Day 3 replaced the Planner and Researcher stubs with real **Groq LLM reasoning** and **Tavily web search**.
+
+The LangGraph architecture from Day 2 remained unchanged.
+
+## Workflow
+
+```text
+Topic
+  ↓
+Planner (Groq)
+  ↓
+3-5 Research Questions
+  ↓
+Researcher
+  ↓
+Tavily Web Search
+  ↓
+Groq Synthesis
+  ↓
+Research Notes
+  ↓
+Critic (Stub)
+  ↓
+Writer (Stub)
+```
+
+## What Was Implemented
+
+* **Planner:** Generates 3-5 focused research questions using Groq.
+* **Structured Output:** Uses Pydantic with `with_structured_output()`.
+* **Researcher:** Searches the web for every generated question.
+* **Tavily:** Provides real-time web search results.
+* **Groq Synthesis:** Converts search results into concise research notes.
+* **Rate-limit handling:** Limited search results and added delays between requests.
+* **State accumulation:** Research results continue to use the `operator.add` reducer.
+
+## Test Topic
+
+```text
+The current state of small modular nuclear reactors
+```
+
+The Planner generated **5 questions**, and the Researcher successfully produced **5 research notes with source URLs**.
+
+## Day 3 Result
+
+```text
+[Planner] Generated 5 sub-questions
+
+[Researcher] Researching 5 questions
+[Researcher] Completed: ...
+[Researcher] Completed: ...
+[Researcher] Completed: ...
+[Researcher] Completed: ...
+[Researcher] Completed: ...
+
+[Critic] Day 3 stub: research approved.
+[Writer] Writing final report
+```
+
+## Key Learning
+
+Day 3 established the real **evidence-generation layer** of the system:
+
+> **Groq plans → Tavily searches → Groq synthesizes → LangGraph stores the evidence.**
