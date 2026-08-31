@@ -299,3 +299,63 @@ The Planner generated **5 questions**, and the Researcher successfully produced 
 Day 3 established the real **evidence-generation layer** of the system:
 
 > **Groq plans → Tavily searches → Groq synthesizes → LangGraph stores the evidence.**
+
+# Day 4 — Critic Agent & Feedback Loop
+
+## Overview
+
+Day 4 introduces the **Critic Agent**, turning the research workflow into a genuine multi-agent system with a feedback loop.
+
+The Critic reviews the Researcher's notes for research quality, coverage, weak sources, unsupported claims, and missing information. If the research is insufficient, the workflow routes back to the Researcher for improvement.
+
+## Workflow
+
+```text
+Planner
+   ↓
+Researcher
+   ↓
+Critic
+   │
+   ├── Needs More Research
+   │         ↓
+   │     Researcher
+   │         ↓
+   │       Critic
+   │
+   └── Approved
+             ↓
+           Writer
+             ↓
+            END
+```
+
+## Day 4 Goals
+
+* Implement the real Critic Agent.
+* Review research notes for gaps and weak evidence.
+* Detect poor or unreliable sources.
+* Identify unanswered sub-questions.
+* Generate actionable feedback for the Researcher.
+* Use conditional routing to send weak research back for revision.
+* Limit research revisions to prevent infinite loops.
+
+## Checklist
+
+* [x] Planner generates research sub-questions.
+* [x] Researcher searches the web using Tavily.
+* [x] Researcher synthesizes search results using Groq.
+* [x] Research notes are stored in shared LangGraph state.
+* [x] Critic node is connected to the workflow.
+* [x] Conditional routing is configured.
+* [x] Researcher → Critic → Writer workflow works.
+* [ ] Replace the Critic stub with an LLM-powered Critic Agent.
+* [ ] Evaluate research coverage and completeness.
+* [ ] Check source quality and reliability.
+* [ ] Detect unsupported or weak claims.
+* [ ] Generate structured Critic feedback.
+* [ ] Set `needs_more_research` dynamically.
+* [ ] Increment `revision_count` when research is rejected.
+* [ ] Send actionable feedback back to the Researcher.
+* [ ] Test the Researcher → Critic feedback loop.
+* [ ] Verify the maximum revision limit works correctly.

@@ -1,4 +1,5 @@
 from typing import TypedDict, Annotated
+
 import operator
 import time
 from datetime import date
@@ -90,6 +91,7 @@ The questions should collectively cover the important
 aspects of the topic.
 
 Research topic:
+
 {state["topic"]}
 """
     )
@@ -174,19 +176,28 @@ You are a research analyst.
 Today's date is {date.today().isoformat()}.
 
 Research question:
+
 {question}
 
 Web search results:
+
 {search_results}
 
 Instructions:
+
 - Answer the research question using only the
   information contained in the search results.
+
 - Do not invent facts.
+
 - Prefer recent and authoritative information.
+
 - Clearly summarize the most important evidence.
+
 - Mention uncertainty where appropriate.
+
 - Include the source URLs.
+
 - Keep the answer under 300 words.
 """
 
@@ -225,27 +236,18 @@ Instructions:
 # ============================================================
 
 def critic_node(state: ResearchState) -> dict:
-    """
-    Day 3 stub.
-
-    The real Critic will be implemented on Day 4.
-    """
-
     print(
         f"\n[Critic] Reviewing "
         f"{len(state['research_notes'])} research notes"
     )
 
-    print(
-        "[Critic] Day 3 stub: research approved."
-    )
+    print("[Critic] Day 3 stub: research approved.")
 
     return {
         "needs_more_research": False,
         "critique": "",
         "revision_count": state["revision_count"],
     }
-
 
 # ============================================================
 # WRITER AGENT
@@ -265,6 +267,7 @@ Research Report
 ===============
 
 Topic:
+
 {state["topic"]}
 
 Research Notes:
@@ -275,9 +278,11 @@ Research Notes:
         report += f"""
 
 Question:
+
 {note["question"]}
 
 Findings:
+
 {note["findings"]}
 """
 
@@ -293,6 +298,7 @@ Findings:
 def route_after_critic(state: ResearchState) -> str:
     """
     Routes to Researcher if more research is needed.
+
     Otherwise sends the workflow to Writer.
     """
 
@@ -316,6 +322,7 @@ def route_after_critic(state: ResearchState) -> str:
         needs_more_research
         and revision_count < 3
     ):
+
         print(
             "[Router] Sending task back "
             "to Researcher"
@@ -336,7 +343,9 @@ def route_after_critic(state: ResearchState) -> str:
 
 def build_graph():
 
-    graph = StateGraph(ResearchState)
+    graph = StateGraph(
+        ResearchState
+    )
 
     graph.add_node(
         "planner",
@@ -358,7 +367,9 @@ def build_graph():
         writer_node
     )
 
-    graph.set_entry_point("planner")
+    graph.set_entry_point(
+        "planner"
+    )
 
     graph.add_edge(
         "planner",
@@ -396,26 +407,41 @@ if __name__ == "__main__":
     app = build_graph()
 
     print("\nGRAPH STRUCTURE:\n")
-    print(app.get_graph().draw_mermaid())
+
+    print(
+        app.get_graph().draw_mermaid()
+    )
 
     initial_state = {
+
         "topic": (
             "the current state of "
             "small modular nuclear reactors"
         ),
+
         "sub_questions": [],
+
         "research_notes": [],
+
         "critique": "",
+
         "needs_more_research": False,
+
         "revision_count": 0,
+
         "final_report": "",
     }
 
-    result = app.invoke(initial_state)
+    result = app.invoke(
+        initial_state
+    )
 
     print("\n")
+
     print("=" * 70)
+
     print("DAY 3 RESEARCH RESULTS")
+
     print("=" * 70)
 
     for note in result["research_notes"]:
@@ -424,4 +450,10 @@ if __name__ == "__main__":
             f"\nQ: {note['question']}"
         )
 
-        print(note["findings"])
+        print()
+
+        print(
+            note["findings"]
+        )
+
+        print("\n" + "-" * 70)
